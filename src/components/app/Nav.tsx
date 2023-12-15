@@ -14,15 +14,24 @@ export const Nav: React.FC<NavProps> = ({
   setBPM,
 }) => {
   return (
-    <HStack justify="space-between" bg="blue" p="10px">
-      <Button onClick={togglePlay} variant="outline" colorScheme="pink">
+    <HStack justify="space-between" bg="#999" p="10px" color="gray">
+      <Button
+        onClick={togglePlay}
+        variant="outline"
+        color="gray"
+        borderColor="gray"
+      >
         {playing ? "pause" : "play"}
       </Button>
 
       <HStack>
-        <Button onClick={() => setBPM(bpm - 1)}>-</Button>
+        <Button color="gray" borderColor="gray" onClick={() => setBPM(bpm - 1)}>
+          -
+        </Button>
         <Text>{bpm}</Text>
-        <Button onClick={() => setBPM(bpm + 1)}>+</Button>
+        <Button color="gray" borderColor="gray" onClick={() => setBPM(bpm + 1)}>
+          +
+        </Button>
       </HStack>
     </HStack>
   );

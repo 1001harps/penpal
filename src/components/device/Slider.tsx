@@ -7,9 +7,15 @@ interface SliderProps {
   value: number;
   onChange: (value: number) => void;
   height?: number;
+  deactivated?: boolean;
 }
 
-export const Slider = ({ value, onChange, height = 100 }: SliderProps) => {
+export const Slider = ({
+  value,
+  onChange,
+  height = 100,
+  deactivated = false,
+}: SliderProps) => {
   const dragging = useRef(false);
   const touchStartY = useRef(0);
 
@@ -71,20 +77,24 @@ export const Slider = ({ value, onChange, height = 100 }: SliderProps) => {
   });
 
   return (
-    <Box bg="#999" w="16px" h={`${height}px`}>
+    <Box
+      bg={deactivated ? "#aaa" : "#999"}
+      w="16px"
+      h={`${height}px`}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      onTouchMove={handleTouchMove}
+      cursor="pointer"
+    >
       <Box
-        bg="grey"
+        bg={deactivated ? "#999" : "grey"}
         h="4px"
         w="100%"
         transform="auto"
         translateY={`${value * height}px`}
-        cursor="pointer"
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchCancel}
-        onTouchMove={handleTouchMove}
       ></Box>
     </Box>
   );

@@ -1,11 +1,27 @@
 import { AspectRatio, Box, Button, Grid, HStack, Text } from "@chakra-ui/react";
 import { Rotary } from "./Rotary";
+import { SoundBankOutput } from "../../output";
+import { useState } from "react";
+import { RotaryWithLabel } from "./RotaryWithLabel";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
 };
 
-export const DrumSamplerUI = () => {
+interface DrumSamplerUIProps {
+  currentStep: number;
+  soundbank: SoundBankOutput;
+  drumStepState: boolean[][];
+  toggleDrumStep: (channel: number, step: number) => void;
+}
+
+export const DrumSamplerUI = ({
+  currentStep,
+  soundbank,
+  drumStepState,
+  toggleDrumStep,
+}: DrumSamplerUIProps) => {
+  const [selectedSampleIndex, setSelectedSampleIndex] = useState(0);
   return (
     <Box w="420px" background="silver" p="16px">
       <HStack justify="space-between" align="baseline" mb="16px">
@@ -13,10 +29,8 @@ export const DrumSamplerUI = () => {
           sampler
         </Text>
         <HStack justify="flex-end" h="32px" spacing="16px">
-          <Rotary value={0.5} onChange={() => {}} />
-          <Rotary value={0.5} onChange={() => {}} />
-          <Rotary value={0.5} onChange={() => {}} />
-          <Rotary value={0.5} onChange={() => {}} />
+          <RotaryWithLabel label="drive" value={0.5} onChange={() => {}} />
+          <RotaryWithLabel label="vol" value={0.5} onChange={() => {}} />
         </HStack>
       </HStack>
 
@@ -28,7 +42,17 @@ export const DrumSamplerUI = () => {
       >
         {mapN(8, (i) => (
           <AspectRatio ratio={1}>
-            <Button key={`drum-pad-${i}`} bg="grey"></Button>
+            <Button
+              key={`drum-pad-${i}`}
+              bg="grey"
+              border={selectedSampleIndex === i ? "3px #99c solid" : "none"}
+              onClick={(e) => {
+                if (!e.shiftKey) {
+                  soundbank.triggerNote(i, 60, 0, 1);
+                }
+                setSelectedSampleIndex(i);
+              }}
+            ></Button>
           </AspectRatio>
         ))}
       </Grid>
@@ -37,25 +61,21 @@ export const DrumSamplerUI = () => {
         w="100%"
         templateColumns="repeat(8,1fr)"
         templateRows="1fr"
-        mb="8px"
+        gap="8px"
       >
-        {mapN(2, (i) => (
-          <Button
-            key={`drum-bank-selector-${i}`}
-            w="12.5%"
-            h="8px"
-            bg="grey"
-          ></Button>
-        ))}
-      </Grid>
-
-      <Grid w="100%" templateColumns="repeat(8,1fr)" templateRows="1fr">
-        {mapN(8, (i) => (
+        {mapN(16, (i) => (
           <Button
             key={`drum-selector-${i}`}
             w="12.5%"
             h="16px"
-            bg="grey"
+            background={
+              drumStepState[i][selectedSampleIndex]
+                ? "#99c"
+                : currentStep === i
+                ? "lightgrey"
+                : "grey"
+            }
+            onClick={() => toggleDrumStep(selectedSampleIndex, i)}
           ></Button>
         ))}
       </Grid>
