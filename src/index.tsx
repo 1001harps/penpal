@@ -4,6 +4,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Index } from "./pages";
 import { Room } from "./pages/room";
+import { Provider as ReduxStoreProvider } from "react-redux";
+import { store } from "./store";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +23,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <ChakraProvider>
-    <RouterProvider router={router} />
+    <ReduxStoreProvider store={store}>
+      <RouterProvider router={router} />
+    </ReduxStoreProvider>
   </ChakraProvider>
 );
 
