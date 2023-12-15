@@ -1,16 +1,27 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
+import { Index } from "./pages";
+import { Room } from "./pages/room";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/room/:roomId",
+    element: <Room />,
+  },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <ChakraProvider>
-    <App />
+    <RouterProvider router={router} />
   </ChakraProvider>
 );
 

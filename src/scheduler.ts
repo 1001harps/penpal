@@ -17,7 +17,7 @@ export class Scheduler {
     this.bpm = initialBPM;
 
     // TODO: this should dynamically generate its own worker
-    this.worker = new Worker("schedulerWorker.js");
+    this.worker = new Worker("/schedulerWorker.js");
 
     this.nextNoteTime = this.audioContext.currentTime;
 

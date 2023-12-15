@@ -20,7 +20,11 @@ export class SamplePlayer implements Device {
     const samples = await Promise.all(
       ["synth", "synth2", "marimba", "bass", "piano", "epiano"].map(
         async (x) => {
-          const sample = await fetchSample(this.context, `samples/${x}.wav`, x);
+          const sample = await fetchSample(
+            this.context,
+            `/samples/${x}.wav`,
+            x
+          );
           return {
             name: sample.name,
             sample: new Sample(this.context, sample.name, sample.buffer),
@@ -122,7 +126,7 @@ export class SoundBankOutput implements Output {
         "piano",
         "epiano",
       ].map(async (x) => {
-        const sample = await fetchSample(this.context, `samples/${x}.wav`, x);
+        const sample = await fetchSample(this.context, `/samples/${x}.wav`, x);
         return {
           name: sample.name,
           sample: new Sample(this.context, sample.name, sample.buffer),
