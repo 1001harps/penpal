@@ -22,7 +22,7 @@ export class Scheduler {
     this.nextNoteTime = this.audioContext.currentTime;
 
     this.worker.onmessage = (e) => {
-      if (e.data == "tick") {
+      if (e.data === "tick") {
         this.tick();
       }
     };

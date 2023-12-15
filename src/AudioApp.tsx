@@ -1,13 +1,20 @@
 import { useInstance } from "./useInstance";
-import { Box, HStack, Stack } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { Box, Stack } from "@chakra-ui/react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { Scheduler } from "./scheduler";
-import { SamplePlayer, SoundBankOutput } from "./output";
+import {
+  DrumMachineParams,
+  SamplePlayer,
+  SoundBankOutput,
+  SynthParams,
+  initialDrumMachineParams,
+  initialSynthParams,
+} from "./output";
 import { Nav } from "./components/app/Nav";
 import { DrumSamplerUI } from "./components/device/DrumSamplerUI";
 import { SynthUI } from "./components/device/SynthUI";
 import { ChatUI } from "./components/device/ChatUI";
-import { Step } from "./types";
+import { Step, makeExhaustive } from "./types";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
@@ -15,12 +22,6 @@ const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
 
 const STEPS = 16;
 const INITIAL_BPM = 120;
-
-const offset = -6;
-
-const notes = [60, 62, 63, 58, 65, 62].map((x) => x + offset);
-const notes2 = [60, 63, 58, 65].map((x) => x + offset);
-
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
 
 const randStep = (): Step => ({
@@ -28,137 +29,207 @@ const randStep = (): Step => ({
   value: Math.random(),
 });
 
+interface EngineState {
+  bpm: number;
+  synthParams: SynthParams;
+  drumMachineParams: DrumMachineParams;
+  synthSteps: Step[];
+  drumMachineSteps: boolean[][];
+}
+
+const initialEngineState: EngineState = {
+  bpm: INITIAL_BPM,
+  synthParams: initialSynthParams,
+  drumMachineParams: initialDrumMachineParams,
+  synthSteps: mapN(STEPS, randStep),
+  drumMachineSteps: mapN(STEPS, () => mapN(8, () => false)),
+};
+
+type EngineAction =
+  | {
+      type: "bpm_changed";
+      value: number;
+    }
+  | {
+      type: "synth_param_changed";
+      param: keyof SynthParams;
+      value: number;
+    }
+  | {
+      type: "drum_machine_param_changed";
+      param: keyof DrumMachineParams;
+      value: number;
+    }
+  | {
+      type: "drum_step_toggled";
+      step: number;
+      channel: number;
+    }
+  | {
+      type: "synth_step_toggled";
+      step: number;
+    }
+  | {
+      type: "synth_step_value_changed";
+      step: number;
+      value: number;
+    };
+
+const engineReducer = (
+  state: EngineState,
+  action: EngineAction
+): EngineState => {
+  switch (action.type) {
+    case "bpm_changed":
+      return { ...state, bpm: action.value };
+    case "synth_param_changed":
+      return {
+        ...state,
+        synthParams: {
+          ...state.synthParams,
+          [action.param]: action.value,
+        },
+      };
+    case "drum_machine_param_changed":
+      return {
+        ...state,
+        drumMachineParams: {
+          ...state.synthParams,
+          [action.param]: action.value,
+        },
+      };
+    case "drum_step_toggled": {
+      const drumMachineSteps = [...state.drumMachineSteps.map((x) => [...x])];
+      drumMachineSteps[action.step][action.channel] =
+        !drumMachineSteps[action.step][action.channel];
+
+      return {
+        ...state,
+        drumMachineSteps,
+      };
+    }
+    case "synth_step_toggled": {
+      const synthSteps = [...state.synthSteps];
+      synthSteps[action.step].active = !synthSteps[action.step].active;
+
+      return {
+        ...state,
+        synthSteps,
+      };
+    }
+    case "synth_step_value_changed": {
+      const synthSteps = [...state.synthSteps];
+
+      synthSteps[action.step].value = action.value;
+      synthSteps[action.step].active = true;
+
+      return {
+        ...state,
+        synthSteps,
+      };
+    }
+  }
+
+  makeExhaustive(action);
+};
+
+export type EngineStateDispatch = React.Dispatch<EngineAction>;
+
 export const AudioApp = () => {
   const ctx = useInstance(() => new AudioContext());
   const scheduler = useInstance(() => new Scheduler(ctx, INITIAL_BPM));
-  const soundBank = useInstance(() => new SoundBankOutput());
-  const samplePlayer = useInstance(() => new SamplePlayer());
+  const drumMachineDevice = useInstance(() => new SoundBankOutput());
+  const synthDevice = useInstance(() => new SamplePlayer());
+  const [devicesInitialised, setDevicesInitialised] = useState(false);
 
+  const [state, dispatch] = useReducer(engineReducer, initialEngineState);
+
+  // local state
   const [currentStep, setCurrentStep] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [bpm, setBPMState] = useState(INITIAL_BPM);
 
-  // synth
-  const [octaveState, setOctaveState] = useState(0.5);
-  const octaveStateRef = useRef(0.5);
-
-  const [filterCutoffState, setFilterCutoffState] = useState(
-    samplePlayer.filterCutoff
-  );
-  const [filterResState, setFilterResState] = useState(samplePlayer.filterRes);
-
-  const setFilterCutoff = (value: number) => {
-    samplePlayer.filterCutoff = value;
-    setFilterCutoffState(value);
+  const onSynthParamChange = (param: keyof SynthParams, value: number) => {
+    dispatch({ type: "synth_param_changed", param, value });
+    synthDevice.setParam(param, value);
   };
 
-  const setFilterRes = (value: number) => {
-    samplePlayer.filterRes = value;
-    setFilterResState(value);
+  const onDrumMachineParamChange = (
+    param: keyof DrumMachineParams,
+    value: number
+  ) => {
+    dispatch({ type: "drum_machine_param_changed", param, value });
+    drumMachineDevice.setParam(param, value);
   };
-
-  const [attackState, setAttackState] = useState(samplePlayer.attack);
-  const [releaseState, setReleaseState] = useState(samplePlayer.release);
-
-  const setAttack = (value: number) => {
-    samplePlayer.attack = value;
-    setAttackState(value);
-  };
-
-  const setRelease = (value: number) => {
-    samplePlayer.release = value;
-    setReleaseState(value);
-  };
-
-  // hack cos of useEffect closure :(
-  useEffect(() => {
-    octaveStateRef.current = octaveState;
-  }, [octaveState]);
-
-  const [tab, setTab] = useState<"drums" | "synth">("drums");
-
-  const [drumStepState, setDrumStepState] = useState(
-    mapN(STEPS, () => mapN(8, () => false))
-  );
-
-  const [synthStepState, setSynthStepState] = useState<Step[]>(
-    mapN(STEPS, randStep)
-  );
 
   const toggleDrumStep = (channel: number, step: number) => {
-    setDrumStepState((prev) => {
-      const next = [...prev.map((x) => [...x])];
-      next[step][channel] = !next[step][channel];
-      return next;
-    });
+    dispatch({ type: "drum_step_toggled", channel, step });
   };
 
   const toggleSynthStep = (step: number) => {
-    setSynthStepState((prev) => {
-      const next = [...prev];
-      next[step].active = !next[step].active;
-      return next;
-    });
+    dispatch({ type: "synth_step_toggled", step });
   };
 
   const updateSynthStepValue = (step: number, value: number) => {
-    setSynthStepState((prev) => {
-      const next = [...prev];
-      next[step].value = value;
-      next[step].active = true;
-      return next;
+    dispatch({ type: "synth_step_value_changed", step, value });
+  };
+
+  const onDrumMachinePadClick = (channel: number) => {
+    drumMachineDevice.triggerNote(channel, 60, 0, 1);
+  };
+
+  const onStep = (timestamp: number) => {
+    setCurrentStep((s) => {
+      const step = s === STEPS - 1 ? 0 : s + 1;
+
+      state.drumMachineSteps[step].forEach((x, channel) => {
+        if (x) {
+          drumMachineDevice.triggerNote(channel, 60, timestamp, 1);
+        }
+      });
+
+      const note = state.synthSteps[step];
+      if (note.active) {
+        const octaveMin = 3;
+        const octaveMax = 7;
+        const octaveRange = octaveMax - octaveMin;
+
+        const octave = Math.floor(
+          state.synthParams.octave * octaveRange + octaveMin
+        );
+        const index = Math.floor(note.value * (SCALE.length - 1));
+        const noteNumber = SCALE[index] + octave * 12;
+        synthDevice.triggerNote(noteNumber, timestamp, 0.8);
+      }
+
+      return step;
     });
   };
 
   useEffect(() => {
-    const onStep = (timestamp: number) => {
-      setCurrentStep((s) => {
-        const step = s === STEPS - 1 ? 0 : s + 1;
-
-        setDrumStepState((state) => {
-          state[step].forEach((x, channel) => {
-            if (x) {
-              soundBank.triggerNote(channel, 60, timestamp, 1);
-            }
-          });
-
-          return state;
-        });
-
-        setSynthStepState((state) => {
-          const note = state[step];
-          if (note.active) {
-            const octaveMin = 3;
-            const octaveMax = 7;
-            const octaveRange = octaveMax - octaveMin;
-            const octave = Math.floor(
-              octaveStateRef.current * octaveRange + octaveMin
-            );
-            const index = Math.floor(note.value * (SCALE.length - 1));
-            const noteNumber = SCALE[index] + octave * 12;
-            samplePlayer.triggerNote(noteNumber, timestamp, 0.8);
-          }
-
-          return state;
-        });
-
-        return step;
-      });
-    };
-
     (async () => {
-      await soundBank.init({ context: ctx });
-      await samplePlayer.init(ctx);
+      await drumMachineDevice.init({ context: ctx });
+      await synthDevice.init(ctx);
 
-      scheduler.addEventListener(onStep);
+      setDevicesInitialised(true);
     })();
-
-    return () => scheduler.removeEventListener(onStep);
   }, []);
 
-  const setBPM = (newBPM: number) => {
-    setBPMState(newBPM);
-    scheduler.setBPM(newBPM);
+  useEffect(() => {
+    if (!devicesInitialised) return;
+
+    scheduler.addEventListener(onStep);
+
+    return () => scheduler.removeEventListener(onStep);
+  }, [
+    devicesInitialised,
+    state.drumMachineSteps,
+    state.synthSteps,
+    state.synthParams.octave,
+  ]);
+
+  const setBPM = (value: number) => {
+    dispatch({ type: "bpm_changed", value });
+    scheduler.setBPM(value);
   };
 
   const togglePlay = () => {
@@ -177,33 +248,27 @@ export const AudioApp = () => {
       <Nav
         playing={playing}
         togglePlay={togglePlay}
-        bpm={bpm}
+        bpm={state.bpm}
         setBPM={setBPM}
       />
 
       <Stack p="16px" alignItems="flex-start">
         <SynthUI
-          samplePlayer={samplePlayer}
-          synthStepState={synthStepState}
+          synthStepState={state.synthSteps}
           toggleSynthStep={toggleSynthStep}
           updateSynthStepValue={updateSynthStepValue}
           currentStep={currentStep}
-          octave={octaveState}
-          setOctave={(value) => setOctaveState(value)}
-          filterCutoff={filterCutoffState}
-          setFilterCutoff={setFilterCutoff}
-          filterRes={filterResState}
-          setFilterRes={setFilterRes}
-          attack={attackState}
-          setAttack={setAttack}
-          release={releaseState}
-          setRelease={setRelease}
+          params={state.synthParams}
+          onParamChange={onSynthParamChange}
         />
         <DrumSamplerUI
+          device={drumMachineDevice}
           currentStep={currentStep}
-          soundbank={soundBank}
-          drumStepState={drumStepState}
+          drumStepState={state.drumMachineSteps}
           toggleDrumStep={toggleDrumStep}
+          params={state.drumMachineParams}
+          onParamChange={onDrumMachineParamChange}
+          onPadClick={onDrumMachinePadClick}
         />
         <ChatUI />
       </Stack>

@@ -43,6 +43,28 @@ export default class AttackReleaseEnv {
   }
 }
 
+export interface SynthParams {
+  volume: number;
+  sample: number;
+  octave: number;
+  filterCutoff: number;
+  filterRes: number;
+  filterEnvMod: number;
+  attack: number;
+  release: number;
+}
+
+export const initialSynthParams = {
+  volume: 0.75,
+  sample: 0,
+  octave: 0.4,
+  filterCutoff: 0.5,
+  filterRes: 0,
+  filterEnvMod: 0,
+  attack: 0,
+  release: 0.3,
+};
+
 interface Device {
   init(context?: AudioContext): Promise<void>;
   triggerNote(note: number, timestamp: number, volume?: number): void;
@@ -54,15 +76,14 @@ export class SamplePlayer implements Device {
   // @ts-ignore
   context: AudioContext;
   samples: Sample[] = [];
-  currentSample: number = 0;
+  params: SynthParams = initialSynthParams;
 
-  filterCutoff = 0.5;
-  filterRes = 0;
-  attack = 0;
-  release = 0.3;
+  setParam(param: keyof SynthParams, value: number) {
+    this.params[param] = value;
+  }
 
   getSampleIndex() {
-    return Math.floor(this.currentSample * (this.samples.length - 1));
+    return Math.floor(this.params.sample * (this.samples.length - 1));
   }
 
   async init(context: AudioContext): Promise<void> {
@@ -91,19 +112,19 @@ export class SamplePlayer implements Device {
     const sample = this.samples[this.getSampleIndex()] as Sample;
 
     const env = new AttackReleaseEnv(this.context);
-    env.attack = this.attack;
-    env.release = this.release;
+    env.attack = this.params.attack;
+    env.release = this.params.release;
 
     // filter, TODO: replace this with something nicer
     const filter = this.context.createBiquadFilter();
 
     filter.type = "lowpass";
-    filter.frequency.value = this.filterCutoff * 7000;
-    filter.Q.value = this.filterRes * 30;
+    filter.frequency.value = this.params.filterCutoff * 7000;
+    filter.Q.value = this.params.filterRes * 30;
 
     // gain node
     const gainNode = this.context.createGain();
-    gainNode.gain.value = volume;
+    gainNode.gain.value = volume * this.params.volume * 1.5;
 
     env.gainNode.connect(filter);
     filter.connect(gainNode);
@@ -111,10 +132,6 @@ export class SamplePlayer implements Device {
 
     env.trigger(timestamp);
     sample.play(env.gainNode, note, timestamp);
-  }
-
-  setCurrentSample(value: number) {
-    this.currentSample = value;
   }
 
   noteOn(note: number, timestamp: number, volume?: number): void {
@@ -176,11 +193,25 @@ export interface Output {
 
 // lofi, mp3, .flv, early internet, dial up, bad connection
 
+export interface DrumMachineParams {
+  volume: number;
+}
+
+export const initialDrumMachineParams = {
+  volume: 0.75,
+};
+
 export class SoundBankOutput implements Output {
   // @ts-ignore
   context: AudioContext;
 
   sampleMap: Sample[] = [];
+
+  params = initialDrumMachineParams;
+
+  setParam(param: keyof DrumMachineParams, value: number) {
+    this.params[param] = value;
+  }
 
   async init(options: OutputOptions = {}) {
     this.context = options.context || new AudioContext();
@@ -226,7 +257,7 @@ export class SoundBankOutput implements Output {
     if (!sample) return;
 
     const gainNode = this.context.createGain();
-    gainNode.gain.value = volume;
+    gainNode.gain.value = volume * this.params.volume;
     gainNode.connect(this.context.destination);
 
     sample.play(gainNode, note, timestamp);

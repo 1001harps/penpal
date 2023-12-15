@@ -1,6 +1,5 @@
 import { AspectRatio, Box, Button, Grid, HStack, Text } from "@chakra-ui/react";
-import { Rotary } from "./Rotary";
-import { SoundBankOutput } from "../../output";
+import { DrumMachineParams, SoundBankOutput } from "../../output";
 import { useState } from "react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
 
@@ -10,16 +9,21 @@ const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
 
 interface DrumSamplerUIProps {
   currentStep: number;
-  soundbank: SoundBankOutput;
+  device: SoundBankOutput;
   drumStepState: boolean[][];
   toggleDrumStep: (channel: number, step: number) => void;
+  onPadClick: (channel: number) => void;
+  params: DrumMachineParams;
+  onParamChange: (param: keyof DrumMachineParams, value: number) => void;
 }
 
 export const DrumSamplerUI = ({
   currentStep,
-  soundbank,
   drumStepState,
   toggleDrumStep,
+  params,
+  onParamChange,
+  onPadClick,
 }: DrumSamplerUIProps) => {
   const [selectedSampleIndex, setSelectedSampleIndex] = useState(0);
   return (
@@ -29,8 +33,11 @@ export const DrumSamplerUI = ({
           sampler
         </Text>
         <HStack justify="flex-end" h="32px" spacing="16px">
-          <RotaryWithLabel label="drive" value={0.5} onChange={() => {}} />
-          <RotaryWithLabel label="vol" value={0.5} onChange={() => {}} />
+          <RotaryWithLabel
+            label="vol"
+            value={params.volume}
+            onChange={(value) => onParamChange("volume", value)}
+          />
         </HStack>
       </HStack>
 
@@ -48,7 +55,7 @@ export const DrumSamplerUI = ({
               border={selectedSampleIndex === i ? "3px #99c solid" : "none"}
               onClick={(e) => {
                 if (!e.shiftKey) {
-                  soundbank.triggerNote(i, 60, 0, 1);
+                  onPadClick(i);
                 }
                 setSelectedSampleIndex(i);
               }}

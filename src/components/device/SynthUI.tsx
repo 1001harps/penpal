@@ -1,65 +1,30 @@
-import { Box, Button, Grid, HStack, Stack, Text } from "@chakra-ui/react";
-import { Rotary } from "./Rotary";
-import { useReducer, useState } from "react";
+import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
 import { Slider } from "./Slider";
 import { Step } from "../../types";
-import { SamplePlayer } from "../../output";
+import { SynthParams } from "../../output";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
 };
 
 interface SynthUIProps {
-  samplePlayer: SamplePlayer;
   currentStep: number;
   synthStepState: Step[];
   toggleSynthStep: (step: number) => void;
   updateSynthStepValue: (step: number, value: number) => void;
-
-  octave: number;
-  setOctave: (value: number) => void;
-  filterCutoff: number;
-  setFilterCutoff: (value: number) => void;
-  filterRes: number;
-  setFilterRes: (value: number) => void;
-  attack: number;
-  setAttack: (value: number) => void;
-  release: number;
-  setRelease: (value: number) => void;
+  params: SynthParams;
+  onParamChange: (param: keyof SynthParams, value: number) => void;
 }
 
 export const SynthUI = ({
-  samplePlayer,
   currentStep,
   synthStepState,
   toggleSynthStep,
   updateSynthStepValue,
-  octave,
-  setOctave,
-  filterCutoff,
-  setFilterCutoff,
-  filterRes,
-  setFilterRes,
-  attack,
-  setAttack,
-  release,
-  setRelease,
+  params,
+  onParamChange,
 }: SynthUIProps) => {
-  const [testValue, onTestValueChange] = useReducer(
-    (_: number, x: number) => x,
-    0.5
-  );
-
-  const [oscValueState, setOscValueState] = useState(
-    samplePlayer.currentSample
-  );
-
-  const handleOscValueChange = (value: number) => {
-    samplePlayer.setCurrentSample(value);
-    setOscValueState(value);
-  };
-
   return (
     <Box w="420px" background="silver" p="16px">
       <HStack justify="space-between" align="baseline" mb="16px">
@@ -70,43 +35,51 @@ export const SynthUI = ({
 
       <HStack mb="16px">
         <RotaryWithLabel
-          label="osc"
-          value={oscValueState}
-          onChange={handleOscValueChange}
+          label="sample"
+          value={params.sample}
+          onChange={(value: number) => onParamChange("sample", value)}
         />
-        <RotaryWithLabel label="octave" value={octave} onChange={setOctave} />
+        <RotaryWithLabel
+          label="octave"
+          value={params.octave}
+          onChange={(value: number) => onParamChange("octave", value)}
+        />
 
         <Box h="48px" w="2px" bg="grey"></Box>
         <RotaryWithLabel
           label="freq"
-          value={filterCutoff}
-          onChange={setFilterCutoff}
+          value={params.filterCutoff}
+          onChange={(value: number) => onParamChange("filterCutoff", value)}
         />
         <RotaryWithLabel
           label="res"
-          value={filterRes}
-          onChange={setFilterRes}
+          value={params.filterRes}
+          onChange={(value: number) => onParamChange("filterRes", value)}
+        />
+        <RotaryWithLabel
+          label="env"
+          value={params.filterEnvMod}
+          onChange={(value: number) => onParamChange("filterEnvMod", value)}
         />
 
         <Box h="48px" w="2px" bg="grey"></Box>
-        <RotaryWithLabel label="attack" value={attack} onChange={setAttack} />
+        <RotaryWithLabel
+          label="attack"
+          value={params.attack}
+          onChange={(value: number) => onParamChange("attack", value)}
+        />
         <RotaryWithLabel
           label="release"
-          value={release}
-          onChange={setRelease}
+          value={params.release}
+          onChange={(value: number) => onParamChange("release", value)}
         />
 
         <Box h="48px" w="2px" bg="grey"></Box>
 
         <RotaryWithLabel
-          label="drive"
-          value={testValue}
-          onChange={onTestValueChange}
-        />
-        <RotaryWithLabel
           label="vol"
-          value={testValue}
-          onChange={onTestValueChange}
+          value={params.volume}
+          onChange={(value) => onParamChange("volume", value)}
         />
       </HStack>
 

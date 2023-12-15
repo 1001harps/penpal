@@ -1,4 +1,4 @@
-import { Box, Spacer, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import React from "react";
 import { ReactNode } from "react";
 

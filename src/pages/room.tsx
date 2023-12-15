@@ -12,7 +12,7 @@ export const Room = () => {
 
   useEffect(() => {
     const name = window.localStorage.getItem("penpal.user.name");
-    const id = window.localStorage.getItem("penpal.user.id");
+    // const id = window.localStorage.getItem("penpal.user.id");
 
     if (!name) {
       navigate("/");
@@ -20,7 +20,7 @@ export const Room = () => {
     }
 
     setIsLoading(false);
-  }, []);
+  }, [navigate, setIsLoading]);
 
   // hack to be able to start AudioContext with no interaction
   if (!hasInteractedWithPage) {
