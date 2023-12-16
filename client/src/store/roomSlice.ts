@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAction, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   SynthParams,
@@ -12,12 +12,21 @@ const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
 };
 
+export interface Message {
+  username: string;
+  userId: string;
+  message: string;
+}
+
 interface EngineState {
   bpm: number;
   synthParams: SynthParams;
   drumMachineParams: DrumMachineParams;
   synthSteps: Step[];
   drumMachineSteps: boolean[][];
+  messages: Message[];
+  connectionStatus: "waiting" | "connected" | "disconnected";
+  roomId: string | null;
 }
 
 const randStep = (): Step => ({
@@ -31,6 +40,9 @@ const initialState: EngineState = {
   drumMachineParams: { ...initialDrumMachineParams },
   synthSteps: mapN(16, randStep),
   drumMachineSteps: mapN(16, () => mapN(8, () => false)),
+  messages: [],
+  connectionStatus: "waiting",
+  roomId: null,
 };
 
 export const counterSlice = createSlice({
@@ -76,6 +88,14 @@ export const counterSlice = createSlice({
       state.synthSteps[action.payload.step].value = action.payload.value;
       state.synthSteps[action.payload.step].active = true;
     },
+    chatMessage: (state, action: PayloadAction<Message>) => {
+      state.messages.push(action.payload);
+    },
+
+    connected: (state, action: PayloadAction<{ roomId: string }>) => {
+      state.connectionStatus = "connected";
+      state.roomId = action.payload.roomId;
+    },
   },
 });
 
@@ -88,6 +108,14 @@ export const {
   drumStepToggled,
   synthStepToggled,
   synthStepValueChanged,
+  chatMessage,
+  connected,
 } = counterSlice.actions;
+
+export const joinRoom = createAction<{ username: string; roomId: string }>(
+  "joinRoom"
+);
+export const createRoom = createAction<{ username: string }>("createRoom");
+export const sendChat = createAction<{ message: string }>("sendChat");
 
 export default counterSlice.reducer;

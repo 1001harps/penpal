@@ -1,6 +1,6 @@
 import { useInstance } from "./useInstance";
 import { Box, Stack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Scheduler } from "./scheduler";
 import {
   DrumMachineParams,
@@ -17,6 +17,7 @@ import {
   bpmChanged,
   drumMachineParamChanged,
   drumStepToggled,
+  sendChat,
   synthParamChanged,
   synthStepToggled,
   synthStepValueChanged,
@@ -104,6 +105,10 @@ export const AudioApp = () => {
     })();
   }, []);
 
+  const onMessageSend = (message: string) => {
+    dispatch(sendChat({ message }));
+  };
+
   useEffect(() => {
     if (!devicesInitialised) return;
 
@@ -160,7 +165,7 @@ export const AudioApp = () => {
           onParamChange={onDrumMachineParamChange}
           onPadClick={onDrumMachinePadClick}
         />
-        <ChatUI />
+        <ChatUI messages={state.messages} onSend={onMessageSend} />
       </Stack>
     </Box>
   );

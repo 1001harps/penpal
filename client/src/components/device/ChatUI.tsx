@@ -9,31 +9,28 @@ import {
 } from "@chakra-ui/react";
 
 import { EMOJIS } from "../../shared";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Message } from "../../store/roomSlice";
 
-interface Message {
-  user: string;
-  message: string;
+interface ChatUIProps {
+  messages: Message[];
+  onSend: (message: string) => void;
 }
 
-export const ChatUI = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+export const ChatUI = ({ messages, onSend }: ChatUIProps) => {
+  // const [messages, setMessages] = useState<Message[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleEmojiClick = (emoji: string) => {
     const user = window.localStorage.getItem("penpal.user.name") || "??";
 
-    setMessages(() => [
-      ...messages,
-      {
-        user,
-        message: emoji,
-      },
-    ]);
-
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    onSend(emoji);
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <Box w="420px" background="silver">
@@ -52,9 +49,9 @@ export const ChatUI = () => {
 
       <Box h="260px" overflow="scroll" p="0 16px" m="16px 0">
         <List>
-          {messages.map(({ user, message }) => (
+          {messages.map(({ username, message }) => (
             <ListItem fontSize="4xl">
-              {user}: {message}
+              {username}: {message}
             </ListItem>
           ))}
         </List>
