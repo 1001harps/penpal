@@ -1,141 +1,25 @@
-import {
-  ActionCreatorWithPayload,
-  configureStore,
-  createListenerMiddleware,
-} from "@reduxjs/toolkit";
+import { configureStore, Middleware } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import roomReducer, {
-  chatMessage,
-  connected,
-  createRoom,
-  joinRoom,
-  sendChat,
-} from "./roomSlice";
+import roomReducer from "./roomSlice";
+import { RoomDependencies } from "./types";
 
-const listenerMiddleware = createListenerMiddleware();
-
-listenerMiddleware.startListening({
-  actionCreator: createRoom,
-  effect: async (action, listenerApi) => {
-    console.log({ action });
-
-    const socket = new WebSocket(
-      `ws://localhost:8080?username=${action.payload.username}`
-    );
-
-    socket.addEventListener("open", (event) => {});
-
-    socket.addEventListener("message", (event) => {
-      console.log("Message from server ", event.data);
-      const message = JSON.parse(event.data);
-
-      if (message.type === "connected") {
-        listenerApi.dispatch(
-          connected({
-            roomId: message.roomId,
-          })
-        );
-      }
-
-      if (message.type === "chat_message") {
-        console.log(message);
-        listenerApi.dispatch(
-          chatMessage({
-            message: message.message,
-            username: message.username,
-            userId: message.userId,
-          })
-        );
-      }
-    });
-
-    // FIXME :(
-    let lastChatMessage: string = "";
-
-    while (
-      await listenerApi.condition((action) => {
-        if (sendChat.match(action)) {
-          lastChatMessage = action.payload.message;
-          return true;
-        }
-
-        return false;
-      })
-    ) {
-      const data = {
-        type: "chat_message",
-        message: lastChatMessage,
-      };
-
-      socket.send(JSON.stringify(data));
-    }
-  },
-});
-
-listenerMiddleware.startListening({
-  actionCreator: joinRoom,
-  effect: async (action, listenerApi) => {
-    console.log({ action });
-
-    const socket = new WebSocket(
-      `ws://localhost:8080?username=${action.payload.username}&roomId=${action.payload.roomId}`
-    );
-
-    socket.addEventListener("open", (event) => {});
-
-    socket.addEventListener("message", (event) => {
-      console.log("Message from server ", event.data);
-      const message = JSON.parse(event.data);
-
-      if (message.type === "connected") {
-        listenerApi.dispatch(
-          connected({
-            roomId: message.roomId,
-          })
-        );
-      }
-
-      if (message.type === "chat_message") {
-        console.log(message);
-        listenerApi.dispatch(
-          chatMessage({
-            message: message.message,
-            username: message.username,
-            userId: message.userId,
-          })
-        );
-      }
-    });
-
-    // FIXME :(
-    let lastChatMessage: string = "";
-
-    while (
-      await listenerApi.condition((action) => {
-        if (sendChat.match(action)) {
-          lastChatMessage = action.payload.message;
-          return true;
-        }
-
-        return false;
-      })
-    ) {
-      const data = {
-        type: "chat_message",
-        message: lastChatMessage,
-      };
-
-      socket.send(JSON.stringify(data));
-    }
-  },
-});
+const logger: Middleware = (store) => (next) => (action) => {
+  console.log("dispatching", action);
+  let result = next(action);
+  // console.log("next state", store.getState());
+  return result;
+};
 
 export const store = configureStore({
   reducer: {
     room: roomReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().prepend(listenerMiddleware.middleware),
+    getDefaultMiddleware({
+      thunk: {
+        extraArgument: { room: null } as RoomDependencies,
+      },
+    }).concat(logger),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -9,7 +9,6 @@ const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
 
 interface DrumSamplerUIProps {
   currentStep: number;
-  device: SoundBankOutput;
   drumStepState: boolean[][];
   toggleDrumStep: (channel: number, step: number) => void;
   onPadClick: (channel: number) => void;

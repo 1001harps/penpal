@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store";
-import { createRoom, joinRoom } from "../store/roomSlice";
+import { createRoom, joinRoom } from "../store/thunk";
 
 const TempNav = () => (
   <HStack justify="space-between" bg="blue" p="10px" h="64px"></HStack>
@@ -25,27 +25,35 @@ export const Index = () => {
 
   const dispatch = useAppDispatch();
 
-  const roomId = useAppSelector((state) => state.room.roomId);
+  const roomId = useAppSelector((state) => state.room.local.roomId);
 
-  const onCreateRoomClick = () => {
+  const onCreateRoomClick = async () => {
+    window.localStorage.setItem("penpal.user.name", nameInputState);
+
     setIsLoading(true);
 
-    dispatch(createRoom({ username: nameInputState }));
+    await dispatch(createRoom({ username: nameInputState }));
 
     setNameInputState("");
+    // setIsLoading(false);
   };
 
-  const onJoinRoomClick = () => {
+  const onJoinRoomClick = async () => {
+    window.localStorage.setItem("penpal.user.name", nameInputState);
+
     setIsLoading(true);
 
-    dispatch(joinRoom({ username: nameInputState, roomId: roomIdInputState }));
+    await dispatch(
+      joinRoom({ username: nameInputState, roomId: roomIdInputState })
+    );
 
     setNameInputState("");
     setRoomIDInputState("");
+    // setIsLoading(false);
   };
 
-  // TODO: figure out how to navigate inside listeners
   useEffect(() => {
+    console.log("room id effect");
     if (!roomId) return;
 
     navigate(`/room/${roomId}`);

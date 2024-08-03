@@ -15,6 +15,7 @@ export const Room = () => {
     // const id = window.localStorage.getItem("penpal.user.id");
 
     if (!name) {
+      console.log("** naving back");
       navigate("/");
       return;
     }

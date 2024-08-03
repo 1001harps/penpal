@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@9h/lib": "npm:@jsr/9h__lib@^0.0.2",
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -15,7 +16,10 @@
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@types/webmidi": "^2.0.7",
+    "comlink": "^4.4.1",
+    "eventemitter3": "^5.0.1",
     "framer-motion": "^10.16.4",
+    "jsondiffpatch": "^0.6.0",
     "nanoid": "^5.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

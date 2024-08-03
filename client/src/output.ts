@@ -1,4 +1,4 @@
-import { Sample, fetchSample } from "./audio";
+import { fetchSample, Sample, Device } from "@9h/lib";
 
 export default class AttackReleaseEnv {
   private context: AudioContext;
@@ -65,13 +65,6 @@ export const initialSynthParams = {
   release: 0.3,
 };
 
-interface Device {
-  init(context?: AudioContext): Promise<void>;
-  triggerNote(note: number, timestamp: number, volume?: number): void;
-  noteOn(note: number, timestamp: number, volume?: number): void;
-  noteOff(note: number, timestamp: number): void;
-}
-
 export class SamplePlayer implements Device {
   // @ts-ignore
   context: AudioContext;
@@ -108,7 +101,9 @@ export class SamplePlayer implements Device {
     this.samples = samples.map((x) => x.sample);
   }
 
-  triggerNote(note: number, timestamp: number, volume: number): void {
+  trigger(note: number, timestamp: number): void {
+    const volume = 1;
+
     const sample = this.samples[this.getSampleIndex()] as Sample;
 
     const env = new AttackReleaseEnv(this.context);
