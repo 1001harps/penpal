@@ -1,4 +1,4 @@
-import { Sample, fetchSample } from "./audio";
+import { Device, fetchSample, Sample } from "@9h/lib";
 
 export default class AttackReleaseEnv {
   private context: AudioContext;
@@ -65,13 +65,6 @@ export const initialSynthParams = {
   release: 0.3,
 };
 
-interface Device {
-  init(context?: AudioContext): Promise<void>;
-  triggerNote(note: number, timestamp: number, volume?: number): void;
-  noteOn(note: number, timestamp: number, volume?: number): void;
-  noteOff(note: number, timestamp: number): void;
-}
-
 export class SamplePlayer implements Device {
   // @ts-ignore
   context: AudioContext;
@@ -108,7 +101,7 @@ export class SamplePlayer implements Device {
     this.samples = samples.map((x) => x.sample);
   }
 
-  triggerNote(note: number, timestamp: number, volume: number): void {
+  trigger(note: number, timestamp: number): void {
     const sample = this.samples[this.getSampleIndex()] as Sample;
 
     const env = new AttackReleaseEnv(this.context);
@@ -124,7 +117,7 @@ export class SamplePlayer implements Device {
 
     // gain node
     const gainNode = this.context.createGain();
-    gainNode.gain.value = volume * this.params.volume * 1.5;
+    gainNode.gain.value = 0.8 * this.params.volume * 1.5;
 
     env.gainNode.connect(filter);
     filter.connect(gainNode);
@@ -149,7 +142,7 @@ export interface OutputOptions {
 
 export interface Output {
   init(options: OutputOptions): Promise<void>;
-  triggerNote(
+  trigger(
     channel: number,
     note: number,
     timestamp: number,
@@ -247,12 +240,7 @@ export class SoundBankOutput implements Output {
     this.sampleMap[7] = sampleTable["lt"];
   }
 
-  triggerNote(
-    channel: number,
-    note: number,
-    timestamp: number,
-    volume: number
-  ) {
+  trigger(channel: number, note: number, timestamp: number, volume: number) {
     const sample = this.sampleMap[channel] as Sample;
     if (!sample) return;
 

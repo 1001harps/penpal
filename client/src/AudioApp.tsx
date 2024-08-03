@@ -1,7 +1,6 @@
 import { useInstance } from "./useInstance";
 import { Box, Stack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { Scheduler } from "./scheduler";
 import {
   DrumMachineParams,
   SamplePlayer,
@@ -22,6 +21,7 @@ import {
   synthStepToggled,
   synthStepValueChanged,
 } from "./store/roomSlice";
+import { Scheduler } from "@9h/lib";
 
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
 
@@ -65,7 +65,7 @@ export const AudioApp = () => {
   };
 
   const onDrumMachinePadClick = (channel: number) => {
-    drumMachineDevice.triggerNote(channel, 60, 0, 1);
+    drumMachineDevice.trigger(channel, 60, 0, 1);
   };
 
   const onStep = (timestamp: number) => {
@@ -74,7 +74,7 @@ export const AudioApp = () => {
 
       state.drumMachineSteps[step].forEach((x, channel) => {
         if (x) {
-          drumMachineDevice.triggerNote(channel, 60, timestamp, 1);
+          drumMachineDevice.trigger(channel, 60, timestamp, 1);
         }
       });
 
@@ -89,7 +89,7 @@ export const AudioApp = () => {
         );
         const index = Math.floor(note.value * (SCALE.length - 1));
         const noteNumber = SCALE[index] + octave * 12;
-        synthDevice.triggerNote(noteNumber, timestamp, 0.8);
+        synthDevice.trigger(noteNumber, timestamp);
       }
 
       return step;
