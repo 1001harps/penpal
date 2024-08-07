@@ -20,6 +20,7 @@ export const Index = () => {
           display="block"
           textDecor="underline"
           href="/room"
+          color="white"
         >
           <Text fontSize="80px">start</Text>
         </Link>

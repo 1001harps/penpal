@@ -9,9 +9,9 @@ import { Box, Stack } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { DrumSamplerUI } from "../components/device/DrumSamplerUI";
 import { SynthUI } from "../components/device/SynthUI";
-import { AppContext } from "../old/AppContext";
 import { SharedState, initialState } from "./state";
 import { useInstance } from "./useInstance";
+import { AppContext } from "../components/utility/AppContext";
 
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
 
@@ -169,7 +169,7 @@ export const Penpal = () => {
     setCurrentStep((s) => {
       console.log("onStep", s);
 
-      const step = s === 15 ? 0 : s + 1;
+      let step = s;
 
       sharedState.drumMachineSteps.forEach((steps, channel) => {
         if (steps[s]) {
@@ -190,6 +190,8 @@ export const Penpal = () => {
         const noteNumber = SCALE[index] + octave * 12;
         synthDevice.trigger(noteNumber, timestamp);
       }
+
+      step = step === 15 ? 0 : s + 1;
 
       return step;
     });

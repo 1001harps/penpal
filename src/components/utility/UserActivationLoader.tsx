@@ -1,3 +1,4 @@
+import { Button, Flex } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 const userActivationEvents = [
@@ -33,10 +34,15 @@ const testUserActivationEvent = (eventName: string, e: Event) => {
   return true;
 };
 
-// @ts-ignore
-const useHasUserBeenActive = () => {
+interface UserActivationLoaderProps {
+  children?: React.ReactNode;
+}
+
+export const UserActivationLoader = ({
+  children,
+}: UserActivationLoaderProps) => {
   const [hasBeenActive, setHasBeenActive] = useState(
-    navigator.userActivation.hasBeenActive
+    !!window?.navigator.userActivation.hasBeenActive
   );
 
   useEffect(() => {
@@ -60,5 +66,19 @@ const useHasUserBeenActive = () => {
     };
   }, [hasBeenActive]);
 
-  return hasBeenActive;
+  const handleLoadClick = () => {
+    setHasBeenActive(true);
+  };
+
+  if (!hasBeenActive) {
+    return (
+      <Flex w="100%" h="100%">
+        <Button m="auto" onClick={handleLoadClick}>
+          load
+        </Button>
+      </Flex>
+    );
+  }
+
+  return children;
 };
