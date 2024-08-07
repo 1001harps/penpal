@@ -1,7 +1,7 @@
 import { AspectRatio, Box, Button, Grid, HStack, Text } from "@chakra-ui/react";
-import { DrumMachineParams, SoundBankOutput } from "../../output";
 import { useState } from "react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
+import { SampleBankDevice, SampleBankParams } from "@9h/lib";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
@@ -9,12 +9,12 @@ const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
 
 interface DrumSamplerUIProps {
   currentStep: number;
-  device: SoundBankOutput;
+  device: SampleBankDevice;
   drumStepState: boolean[][];
   toggleDrumStep: (channel: number, step: number) => void;
   onPadClick: (channel: number) => void;
-  params: DrumMachineParams;
-  onParamChange: (param: keyof DrumMachineParams, value: number) => void;
+  params: SampleBankParams;
+  onParamChange: (param: keyof SampleBankParams, value: number) => void;
 }
 
 export const DrumSamplerUI = ({
@@ -25,7 +25,8 @@ export const DrumSamplerUI = ({
   onParamChange,
   onPadClick,
 }: DrumSamplerUIProps) => {
-  const [selectedSampleIndex, setSelectedSampleIndex] = useState(0);
+  const [channelIndex, setChannelIndex] = useState(0);
+
   return (
     <Box w="420px" background="silver" p="16px">
       <HStack justify="space-between" align="baseline" mb="16px">
@@ -52,12 +53,12 @@ export const DrumSamplerUI = ({
             <Button
               key={`drum-pad-${i}`}
               bg="grey"
-              border={selectedSampleIndex === i ? "3px #99c solid" : "none"}
+              border={channelIndex === i ? "3px #99c solid" : "none"}
               onClick={(e) => {
                 if (!e.shiftKey) {
                   onPadClick(i);
                 }
-                setSelectedSampleIndex(i);
+                setChannelIndex(i);
               }}
             ></Button>
           </AspectRatio>
@@ -70,19 +71,19 @@ export const DrumSamplerUI = ({
         templateRows="1fr"
         gap="8px"
       >
-        {mapN(16, (i) => (
+        {mapN(16, (stepIndex) => (
           <Button
-            key={`drum-selector-${i}`}
+            key={`drum-selector-${stepIndex}`}
             w="12.5%"
             h="16px"
             background={
-              drumStepState[i][selectedSampleIndex]
+              drumStepState[channelIndex][stepIndex]
                 ? "#99c"
-                : currentStep === i
+                : currentStep === stepIndex
                 ? "lightgrey"
                 : "grey"
             }
-            onClick={() => toggleDrumStep(selectedSampleIndex, i)}
+            onClick={() => toggleDrumStep(channelIndex, stepIndex)}
           ></Button>
         ))}
       </Grid>

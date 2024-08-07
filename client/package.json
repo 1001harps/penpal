@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@9h/lib": "npm:@jsr/9h__lib@^0.0.3",
+    "@9h/lib": "npm:@jsr/9h__lib@^0.0.7",
+    "@9h/react-synced-state": "npm:@jsr/9h__react-synced-state@^0.2.1",
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

@@ -2,7 +2,7 @@ import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
 import { Slider } from "./Slider";
 import { Step } from "../../types";
-import { SynthParams } from "../../output";
+import { SamplePlayerParams } from "@9h/lib";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));
@@ -13,8 +13,8 @@ interface SynthUIProps {
   synthStepState: Step[];
   toggleSynthStep: (step: number) => void;
   updateSynthStepValue: (step: number, value: number) => void;
-  params: SynthParams;
-  onParamChange: (param: keyof SynthParams, value: number) => void;
+  params: SamplePlayerParams;
+  onParamChange: (param: keyof SamplePlayerParams, value: number) => void;
 }
 
 export const SynthUI = ({
