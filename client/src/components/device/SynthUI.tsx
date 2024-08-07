@@ -1,7 +1,7 @@
 import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
 import { Slider } from "./Slider";
-import { Step } from "../../types";
+import { Step } from "../../penpal/types";
 import { SamplePlayerParams } from "@9h/lib";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {

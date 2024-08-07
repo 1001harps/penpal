@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Spinner } from "@chakra-ui/react";
-import { AudioApp } from "../AudioApp";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Penpal } from "../penpal/Penpal";
 
 export const Room = () => {
   const [hasInteractedWithPage, setHasInteractedWithPage] = useState(
@@ -12,7 +12,6 @@ export const Room = () => {
 
   useEffect(() => {
     const name = window.localStorage.getItem("penpal.user.name");
-    // const id = window.localStorage.getItem("penpal.user.id");
 
     if (!name) {
       navigate("/");
@@ -22,7 +21,6 @@ export const Room = () => {
     setIsLoading(false);
   }, [navigate, setIsLoading]);
 
-  // hack to be able to start AudioContext with no interaction
   if (!hasInteractedWithPage) {
     return (
       <Box as="main">
@@ -38,7 +36,7 @@ export const Room = () => {
           <Spinner />
         </Flex>
       ) : (
-        <AudioApp />
+        <Penpal />
       )}
     </Box>
   );

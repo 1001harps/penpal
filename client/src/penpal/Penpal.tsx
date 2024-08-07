@@ -5,18 +5,18 @@ import {
   SamplePlayerParams,
   Scheduler,
 } from "@9h/lib";
+import { useSyncedStateReducer } from "@9h/react-synced-state/hooks";
 import { Box, Stack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { Nav } from "../components/app/Nav";
+import { DrumSamplerUI } from "../components/device/DrumSamplerUI";
+import { SynthUI } from "../components/device/SynthUI";
 import { SharedState, initialState } from "./state";
-import { Nav } from "./components/app/Nav";
-import { DrumSamplerUI } from "./components/device/DrumSamplerUI";
-import { SynthUI } from "./components/device/SynthUI";
 import { useInstance } from "./useInstance";
-import { useSyncedStateReducer } from "@9h/react-synced-state/hooks";
 
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
 
-interface AudioAppProps {}
+interface Penpal {}
 
 const samplePlayerFiles = [
   "synth",
@@ -101,7 +101,7 @@ const reducer = (state: SharedState, action: SharedStateAction) => {
   return state;
 };
 
-export const AudioApp = (props: AudioAppProps) => {
+export const Penpal = (props: Penpal) => {
   const [sharedState, dispatch] = useSyncedStateReducer(
     {
       url: `ws://localhost:8080`,

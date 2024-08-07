@@ -1,11 +1,14 @@
-import { Step } from "./types";
-
 import {
   SampleBankDevice,
   SampleBankParams,
   SamplePlayerDevice,
   SamplePlayerParams,
 } from "@9h/lib";
+
+export interface Step {
+  active: boolean;
+  value: number;
+}
 
 const randStep = (): Step => ({
   active: false,

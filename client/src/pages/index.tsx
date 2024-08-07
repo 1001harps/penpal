@@ -1,5 +1,4 @@
 import { Box, Flex, Image, Link, Stack, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 
 export const Index = () => {
   return (
