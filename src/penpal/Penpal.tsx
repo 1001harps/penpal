@@ -7,16 +7,15 @@ import {
 } from "@9h/lib";
 import { useSyncedStateReducer } from "@9h/react-synced-state/hooks";
 import { Box, Stack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Nav } from "../components/app/Nav";
 import { DrumSamplerUI } from "../components/device/DrumSamplerUI";
 import { SynthUI } from "../components/device/SynthUI";
 import { SharedState, initialState } from "./state";
 import { useInstance } from "./useInstance";
+import { AppContext } from "../old/AppContext";
 
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
-
-interface Penpal {}
 
 const samplePlayerFiles = [
   "synth",
@@ -101,7 +100,7 @@ const reducer = (state: SharedState, action: SharedStateAction) => {
   return state;
 };
 
-export const Penpal = (props: Penpal) => {
+export const Penpal = () => {
   const [sharedState, dispatch] = useSyncedStateReducer(
     {
       url: `ws://localhost:8080`,
@@ -112,7 +111,7 @@ export const Penpal = (props: Penpal) => {
   );
 
   const ctx = useInstance(() => new AudioContext());
-  const scheduler = useInstance(() => new Scheduler(ctx, 120));
+  // const scheduler = useInstance(() => new Scheduler(ctx, 120));
   const drumMachineDevice = useInstance(
     () => new SampleBankDevice(drumMachineFiles)
   );
@@ -120,6 +119,8 @@ export const Penpal = (props: Penpal) => {
     () => new SamplePlayerDevice(samplePlayerFiles)
   );
   const [devicesInitialised, setDevicesInitialised] = useState(false);
+
+  const { engine } = useContext(AppContext);
 
   // const navigate = useNavigate();
 
@@ -181,6 +182,8 @@ export const Penpal = (props: Penpal) => {
 
   const onStep = (timestamp: number) => {
     setCurrentStep((s) => {
+      console.log("onStep", s);
+
       const step = s === 15 ? 0 : s + 1;
 
       sharedState.drumMachineSteps.forEach((steps, channel) => {
@@ -219,9 +222,11 @@ export const Penpal = (props: Penpal) => {
   useEffect(() => {
     if (!devicesInitialised) return;
 
-    scheduler.addEventListener(onStep);
+    console.log("here", engine.value);
 
-    return () => scheduler.removeEventListener(onStep);
+    engine.value.scheduler.addEventListener(onStep);
+
+    return () => engine.value.scheduler.removeEventListener(onStep);
   }, [
     devicesInitialised,
     sharedState.drumMachineSteps,
@@ -229,31 +234,31 @@ export const Penpal = (props: Penpal) => {
     sharedState.samplePlayerParams.octave,
   ]);
 
-  const setBPM = (value: number) => {
-    dispatch({ type: "update_bpm", payload: value });
+  // const setBPM = (value: number) => {
+  //   dispatch({ type: "update_bpm", payload: value });
 
-    scheduler.setBPM(value);
-  };
+  //   engine.value.scheduler.setBPM(value);
+  // };
 
-  const togglePlay = () => {
-    if (playing) {
-      scheduler.stop();
-      setPlaying(false);
-      return;
-    }
+  // const togglePlay = () => {
+  //   if (playing) {
+  //     engine.value.scheduler.stop();
+  //     setPlaying(false);
+  //     return;
+  //   }
 
-    scheduler.start();
-    setPlaying(true);
-  };
+  //   engine.value.scheduler.start();
+  //   setPlaying(true);
+  // };
 
   return (
     <Box bg="white" h="100vh">
-      <Nav
+      {/* <Nav
         playing={playing}
         togglePlay={togglePlay}
         bpm={sharedState.bpm}
         setBPM={setBPM}
-      />
+      /> */}
 
       <Stack p="16px" alignItems="flex-start">
         <SynthUI
