@@ -1,17 +1,7 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Image,
-  Link,
-  List,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Image, List, Stack } from "@chakra-ui/react";
 import { useContext, useState } from "react";
-import { AppContext } from "./AppContext";
 import { Penpal } from "../penpal/Penpal";
+import { AppContext } from "./AppContext";
 
 export const Room = () => {
   const [isPlaying, setIsPlaying] = useState(false);

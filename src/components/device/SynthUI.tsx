@@ -1,8 +1,8 @@
 import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { RotaryWithLabel } from "./RotaryWithLabel";
 import { Slider } from "./Slider";
-import { Step } from "../../penpal/types";
 import { SamplePlayerParams } from "@9h/lib";
+import { Step } from "../../penpal/state";
 
 const mapN = <T extends any>(n: number, cb: (index: number) => T) => {
   return new Array(n).fill(null).map((_, i) => cb(i));

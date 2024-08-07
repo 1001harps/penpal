@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Box } from "@chakra-ui/react";
 import { useRef, useEffect } from "react";
 

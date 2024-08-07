@@ -3,17 +3,15 @@ import {
   SampleBankParams,
   SamplePlayerDevice,
   SamplePlayerParams,
-  Scheduler,
 } from "@9h/lib";
 import { useSyncedStateReducer } from "@9h/react-synced-state/hooks";
 import { Box, Stack } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
-import { Nav } from "../components/app/Nav";
 import { DrumSamplerUI } from "../components/device/DrumSamplerUI";
 import { SynthUI } from "../components/device/SynthUI";
+import { AppContext } from "../old/AppContext";
 import { SharedState, initialState } from "./state";
 import { useInstance } from "./useInstance";
-import { AppContext } from "../old/AppContext";
 
 const SCALE = [0, 2, 4, 5, 7, 9, 11];
 
@@ -111,7 +109,6 @@ export const Penpal = () => {
   );
 
   const ctx = useInstance(() => new AudioContext());
-  // const scheduler = useInstance(() => new Scheduler(ctx, 120));
   const drumMachineDevice = useInstance(
     () => new SampleBankDevice(drumMachineFiles)
   );
@@ -122,20 +119,8 @@ export const Penpal = () => {
 
   const { engine } = useContext(AppContext);
 
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   if (!stateKey) return;
-
-  //   navigate(`/room/${stateKey}`, { replace: true });
-  // }, [stateKey]);
-
-  // const state = useAppSelector((x) => x.room);
-  // const dispatch = useAppDispatch();
-
   // local state
   const [currentStep, setCurrentStep] = useState(0);
-  const [playing, setPlaying] = useState(false);
 
   const onSynthParamChange = (
     param: keyof SamplePlayerParams,

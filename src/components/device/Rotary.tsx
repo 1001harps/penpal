@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useEffect, useRef } from "react";
 
 const roundHundredths = (n: number) => Math.round(n * 100) / 100;

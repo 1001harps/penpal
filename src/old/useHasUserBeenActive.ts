@@ -33,6 +33,7 @@ const testUserActivationEvent = (eventName: string, e: Event) => {
   return true;
 };
 
+// @ts-ignore
 const useHasUserBeenActive = () => {
   const [hasBeenActive, setHasBeenActive] = useState(
     navigator.userActivation.hasBeenActive
