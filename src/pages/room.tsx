@@ -3,8 +3,11 @@ import { useContext, useState } from "react";
 import { Penpal } from "../penpal/Penpal";
 import { UserActivationLoader } from "../components/utility/UserActivationLoader";
 import { AppContext } from "../components/utility/AppContext";
+import { useParams } from "react-router-dom";
 
 export const Room = () => {
+  const { id } = useParams();
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   const { engine } = useContext(AppContext);
@@ -85,7 +88,7 @@ export const Room = () => {
       </Grid> */}
 
       <UserActivationLoader>
-        <Penpal />
+        <Penpal roomId={id!} />
       </UserActivationLoader>
 
       <Box

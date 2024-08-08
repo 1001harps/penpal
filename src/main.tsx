@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Index } from "./pages/index.tsx";
 import { Room } from "./pages/room.tsx";
 import { AppContextProvider } from "./components/utility/AppContext.tsx";
+import "./main.css";
 
 const router = createBrowserRouter([
   {
@@ -11,7 +12,7 @@ const router = createBrowserRouter([
     element: <Index />,
   },
   {
-    path: "/room",
+    path: "/room/:id",
     element: <Room />,
   },
 ]);
