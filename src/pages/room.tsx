@@ -5,6 +5,8 @@ import { UserActivationLoader } from "../components/utility/UserActivationLoader
 import { AppContext } from "../components/utility/AppContext";
 import { useParams } from "react-router-dom";
 
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
+
 export const Room = () => {
   const { id } = useParams();
 
@@ -88,7 +90,7 @@ export const Room = () => {
       </Grid> */}
 
       <UserActivationLoader>
-        <Penpal roomId={id!} />
+        <Penpal url={WS_BASE_URL} roomId={id!} />
       </UserActivationLoader>
 
       <Box

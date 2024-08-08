@@ -99,14 +99,15 @@ const reducer = (state: SharedState, action: SharedStateAction) => {
 };
 
 interface PenpalProps {
+  url: string;
   roomId: string;
 }
 
-export const Penpal = ({ roomId }: PenpalProps) => {
+export const Penpal = ({ url, roomId }: PenpalProps) => {
   const [sharedState, dispatch] = useSyncedStateReducer(
     {
-      url: `ws://localhost:8080`,
-      initialState: initialState,
+      url,
+      initialState,
       roomId,
     },
     reducer
