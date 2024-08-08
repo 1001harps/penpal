@@ -1,5 +1,6 @@
-import { Button, Flex } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { Button } from "../app/Button";
 
 const userActivationEvents = [
   "keydown",
@@ -73,7 +74,7 @@ export const UserActivationLoader = ({
   if (!hasBeenActive) {
     return (
       <Flex w="100%" h="100%">
-        <Button m="auto" onClick={handleLoadClick}>
+        <Button m="auto" color="orange" onClick={handleLoadClick}>
           load
         </Button>
       </Flex>
