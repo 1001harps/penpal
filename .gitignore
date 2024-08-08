@@ -28,3 +28,4 @@ dist-ssr
 .vite
 
 .DS_Store
+.env*.local

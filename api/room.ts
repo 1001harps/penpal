@@ -1,9 +1,16 @@
 import { randomUUID } from "crypto";
+import { kv } from "@vercel/kv";
 
-export function GET(request: Request) {
-  const body = { id: randomUUID() };
+const ROOM_QUEUE_KEY = "ROOM_WAITING";
 
-  return new Response(JSON.stringify(body), {
+export async function GET(request: Request) {
+  let id = await kv.lpop<string>(ROOM_QUEUE_KEY);
+  if (id === null) {
+    id = randomUUID();
+    await kv.lpush(ROOM_QUEUE_KEY, id);
+  }
+
+  return new Response(JSON.stringify({ id }), {
     status: 200,
     headers: {
       "content-type": "application/json",
