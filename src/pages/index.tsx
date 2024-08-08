@@ -1,6 +1,8 @@
-import { Box, Button, Flex, Image, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BigLink } from "../components/app/BigLink";
+import { ErrorButton, Button } from "../components/app/Button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -8,18 +10,22 @@ export const Index = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleStartClick = async () => {
+    setError(false);
     setLoading(true);
 
-    const response = await fetch(`${API_BASE_URL}/api/room`);
-    const data = await response.json();
-
-    navigate(`/room/${data.id}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/room`);
+      const data = await response.json();
+      navigate(`/room/${data.id}`);
+    } catch (error) {
+      console.error(error);
+      setError(true);
+    }
 
     setLoading(false);
-
-    console.log(data);
   };
 
   return (
@@ -34,41 +40,29 @@ export const Index = () => {
       </Flex>
 
       <Stack p="16px" w="100%">
-        {loading ? (
-          <Box
-            w="100%"
-            textAlign="center"
-            m="auto"
-            display="block"
-            color="white"
-            className="blink"
-          >
-            <Text fontSize="80px">loading</Text>
-          </Box>
+        {error ? (
+          <BigLink onClick={handleStartClick}>
+            <ErrorButton>retry?</ErrorButton>
+          </BigLink>
+        ) : loading ? (
+          <BigLink>
+            <Text fontSize="80px" fontWeight="600" className="blink">
+              loading
+            </Text>
+          </BigLink>
         ) : (
-          <Button
-            w="100%"
-            textAlign="center"
-            m="auto"
-            display="block"
-            textDecor="underline"
-            variant="link"
-            color="white"
-            onClick={handleStartClick}
-          >
-            <Text fontSize="80px">start</Text>
-          </Button>
+          <BigLink onClick={handleStartClick}>
+            <Button
+              variant="link"
+              color="white"
+              textDecor="underline"
+              fontSize="80px"
+            >
+              start
+            </Button>
+          </BigLink>
         )}
       </Stack>
-
-      <Stack
-        p="16px"
-        w="100%"
-        textAlign="center"
-        m="auto"
-        display="block"
-        textDecor="underline"
-      ></Stack>
     </Box>
   );
 };
