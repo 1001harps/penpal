@@ -28,9 +28,7 @@ export const SynthUI = ({
   return (
     <Box w="420px" background="silver" p="16px">
       <HStack justify="space-between" align="baseline" mb="16px">
-        <Text fontSize="lg" color="grey">
-          synth
-        </Text>
+        <Text fontSize="lg" color="grey"></Text>
       </HStack>
 
       <HStack mb="16px">

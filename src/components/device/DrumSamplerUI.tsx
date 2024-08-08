@@ -30,9 +30,7 @@ export const DrumSamplerUI = ({
   return (
     <Box w="420px" background="silver" p="16px">
       <HStack justify="space-between" align="baseline" mb="16px">
-        <Text fontSize="lg" color="grey">
-          sampler
-        </Text>
+        <Text fontSize="lg" color="grey"></Text>
         <HStack justify="flex-end" h="32px" spacing="16px">
           <RotaryWithLabel
             label="vol"
